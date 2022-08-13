@@ -29,8 +29,7 @@ module.exports = {
         res.send(data);
       }
     });
-    //res.send(models.messages.create(req.body));
-    // models.messages.create will create in the db
+
 
   } // a function which handles posting a message to the database
 };

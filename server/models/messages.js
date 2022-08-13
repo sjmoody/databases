@@ -1,41 +1,89 @@
 var db = require('../db');
 const mysql = require('mysql2');
 
+var Sequelize = require('sequelize');
+
+var dbs = new Sequelize('chat', 'root', '', {
+  dialect: 'mysql'
+});
+
+var User = dbs.define('User', {
+  Name: Sequelize.STRING
+}, {timestamps: false});
+
+var Message = dbs.define('Message', {
+  user_ID: Sequelize.INTEGER,
+  roomname: Sequelize.STRING,
+  text: Sequelize.STRING
+}, {timestamps: false});
 
 module.exports = {
-  getAll: function (callback) {
-    // expected db.query to know what it is - maybe another function?
+  // mysql version
+  // getAll: function (callback) {
+  //   db.db.query('SELECT * from Messages', (err, results) => {
+  //     if (err) {
+  //       throw err;
+  //     } else {
+  //       callback(null, results);
+  //     }
+  //   });
+  // },
 
-    db.db.query('SELECT * from Messages', (err, results) => {
-      if (err) {
-        throw err;
-      } else {
-        // console.log(results);
-        // callback(null, JSON.stringify(results));
-        // console.log('Results: ', JSON.stringify(results));
+  getAll: function (cb) {
+    Message.sync()
+      .then(function() {
+        return Message.findAll();
+      })
+      .then(function(data) {
+        dbs.close();
+        cb(null, data);
+      })
+      .catch(function(err) {
+        console.error(err);
+        dbs.close();
+      });
+  },
 
+  create: function(obj, cb) {
+    // find user_ID for obj.username
+    // then create message {
+      // user_ID: result of promise
+      // roomname : obj.roomname,
+      // message : obj.message }
 
-        callback(null, results);
-      }
-    });
-  }, // a function which produces all the messages
-
-  // TODO: USE THE PATTERN ABOVE FOR MESSAGES AND USERS MODELS AND UPDATE USERS AND MESSAGE CONTROLLERS FOR SAME PATTERN THEN EXPECT TEST TO PASS!!!
-  create: function (obj, cb) {
-
-    db.db.query(`SELECT id FROM Users WHERE name = '${obj.username}'`, (err, results) => {
-      if (err) {
-        throw err;
-      } else {
-        console.log('Query Results: ', results);
-        db.db.query(`INSERT INTO Messages VALUES (NULL, ${results[0].id}, '${obj.roomname}', '${obj.message}')`, (err, results1) => {
-          if (err) {
-            throw err;
-          }
-          cb(null, results1);
+    dbs.sync()
+      .then(()=>{
+        return User.findAll({where: {Name: obj.username}});
+      })
+      .then((results)=>{
+        return Message.create({
+          user_ID: results[0].id,
+          roomname: obj.roomname,
+          text: obj.text
         });
-      }
+      })
+      .then((results) =>{
+        dbs.close();
+        cb(null, results);
+      })
+      .catch((err)=>{
+        console.error(err);
+        dbs.close();
+      });
+  }
 
-    });
-  } // a function which can be used to insert a message into the database
+  // create: function (obj, cb) {
+  //   db.db.query(`SELECT id FROM Users WHERE name = '${obj.username}'`, (err, results) => {
+  //     if (err) {
+  //       throw err;
+  //     } else {
+  //       db.db.query(`INSERT INTO Messages VALUES (NULL, ${results[0].id}, '${obj.roomname}', '${obj.message}')`, (err, results1) => {
+  //         if (err) {
+  //           throw err;
+  //         }
+  //         cb(null, results1);
+  //       });
+  //     }
+  //   });
+  // }
 };
