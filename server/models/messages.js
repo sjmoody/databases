@@ -18,39 +18,21 @@ var Message = dbs.define('Message', {
 }, {timestamps: false});
 
 module.exports = {
-  // mysql version
-  // getAll: function (callback) {
-  //   db.db.query('SELECT * from Messages', (err, results) => {
-  //     if (err) {
-  //       throw err;
-  //     } else {
-  //       callback(null, results);
-  //     }
-  //   });
-  // },
-
   getAll: function (cb) {
     Message.sync()
       .then(function() {
         return Message.findAll();
       })
       .then(function(data) {
-        // dbs.close();
         cb(null, data);
       })
       .catch(function(err) {
         console.error(err);
-        // dbs.close();
+        dbs.close();
       });
   },
 
   create: function(obj, cb) {
-    // Expect obj to be {username, message, roomname}
-    // find user_ID for obj.username
-    // then create message {
-      // user_ID: result of promise
-      // roomname : obj.roomname,
-      // message : obj.message }
 
     dbs.sync()
       .then(()=>{
@@ -64,27 +46,12 @@ module.exports = {
         });
       })
       .then((results) =>{
-        // dbs.close();
         cb(null, results);
       })
       .catch((err)=>{
         console.error(err);
-        // dbs.close();
+        dbs.close();
       });
   }
 
-  // create: function (obj, cb) {
-  //   db.db.query(`SELECT id FROM Users WHERE name = '${obj.username}'`, (err, results) => {
-  //     if (err) {
-  //       throw err;
-  //     } else {
-  //       db.db.query(`INSERT INTO Messages VALUES (NULL, ${results[0].id}, '${obj.roomname}', '${obj.message}')`, (err, results1) => {
-  //         if (err) {
-  //           throw err;
-  //         }
-  //         cb(null, results1);
-  //       });
-  //     }
-  //   });
-  // }
 };

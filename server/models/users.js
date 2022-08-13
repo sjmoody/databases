@@ -1,21 +1,40 @@
 var db = require('../db');
+var Sequelize = require('sequelize');
+var dbs = new Sequelize('chat', 'root', '', {dialect: 'mysql'});
+
+var User = dbs.define('User', {
+  Name: Sequelize.STRING
+}, {timestamps: false});
 
 module.exports = {
   getAll: function (cb) {
-    db.db.query('SELECT * FROM Users', (err, results) => {
-      if (err) {
+    User.sync()
+      .then(function() {
+        return User.findAll();
+      })
+      .then(function(data) {
+        cb(null, data);
+      })
+      .catch(function(err) {
         throw err;
-      } else {
-        cb(null, results);
-      }
-    });
+        dbs.close();
+      });
   },
-  create: function (obj, cb) {
-    db.db.query(`INSERT INTO Users VALUES (NULL, '${obj.username}')`, (err, results) => {
-      if (err) {
+
+  create: function(obj, cb) {
+    User.sync()
+      .then(()=>{
+        return User.create({
+          Name: obj.username
+        });
+      })
+      .then((results) => {
+        cb(null, results);
+      })
+      .catch((err) => {
         throw err;
-      }
-      cb(null, results);
-    });
+        dbs.close();
+      });
   }
+
 };
