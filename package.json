@@ -11,8 +11,7 @@
   "scripts": {
     "start": "node ./server/app.js",
     "start:es6": "npx babel-node ./server/app.js",
-    "test": "jest",
-    "scheme": "mysql -u root < server/schema.sql && jest",
+    "test": "mysql -u root < server/schema.sql && jest",
     "lint": "eslint ./"
   },
   "dependencies": {

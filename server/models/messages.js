@@ -35,16 +35,17 @@ module.exports = {
         return Message.findAll();
       })
       .then(function(data) {
-        dbs.close();
+        // dbs.close();
         cb(null, data);
       })
       .catch(function(err) {
         console.error(err);
-        dbs.close();
+        // dbs.close();
       });
   },
 
   create: function(obj, cb) {
+    // Expect obj to be {username, message, roomname}
     // find user_ID for obj.username
     // then create message {
       // user_ID: result of promise
@@ -59,16 +60,16 @@ module.exports = {
         return Message.create({
           user_ID: results[0].id,
           roomname: obj.roomname,
-          text: obj.text
+          text: obj.message
         });
       })
       .then((results) =>{
-        dbs.close();
+        // dbs.close();
         cb(null, results);
       })
       .catch((err)=>{
         console.error(err);
-        dbs.close();
+        // dbs.close();
       });
   }
 
