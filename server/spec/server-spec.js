@@ -15,12 +15,7 @@ describe('Persistent Node Chat Server', () => {
 
   beforeAll((done) => {
     dbConnection.connect();
-
-    const tablename = 'Messages'; // TODO: fill this out
-
-    /* Empty the db table before all tests so that multiple tests
-     * (or repeated runs of the tests)  will not fail when they should be passing
-     * or vice versa */
+    const tablename = 'Messages';
     dbConnection.query(`truncate ${tablename}`, done);
   }, 6500);
 
@@ -28,9 +23,11 @@ describe('Persistent Node Chat Server', () => {
     dbConnection.end();
   });
 
+
+
   it('Should insert posted messages to the DB', (done) => {
     const username = 'Valjean';
-    const message = 'In mercy\'s name, three days is all I need.';
+    const message = 'In mercys name, three days is all I need.';
     const roomname = 'Hello';
     // Create a user on the chat server database.
     axios.post(`${API_URL}/users`, { username })
@@ -40,6 +37,8 @@ describe('Persistent Node Chat Server', () => {
       })
       .then(() => {
         // Now if we look in the database, we should find the posted message there.
+        // 'INSERT INTO Users VALUES (Valjean)'
+        // 'INSERT INTO Users VALUES (NULL, Valjean)'
 
         /* TODO: You might have to change this test to get all the data from
          * your message table, since this is schema-dependent. */
@@ -63,10 +62,36 @@ describe('Persistent Node Chat Server', () => {
       });
   });
 
+  // it should getAll users
+  it('Should output all users from the DB', (done) => {
+    const queryString = 'SELECT * FROM Users';
+    const queryArgs = [];
+    const username = 'Valjean';
+
+    dbConnection.query(queryString, queryArgs, (err) => {
+      if (err) {
+        throw err;
+      }
+
+      axios.get(`${API_URL}/users`)
+        .then((response) => {
+          const userLog = response.data;
+          expect(userLog[0].Name).toEqual(username);
+          done();
+        })
+        .catch((err) => {
+          throw err;
+        });
+
+    });
+  });
+
   it('Should output all messages from the DB', (done) => {
     // Let's insert a message into the db
     const queryString = 'SELECT * FROM Messages';
     const queryArgs = [];
+    const message = 'In mercys name, three days is all I need.';
+    const roomname = 'Hello';
     /* TODO: The exact query string and query args to use here
      * depend on the schema you design, so I'll leave them up to you. */
     dbConnection.query(queryString, queryArgs, (err) => {
@@ -87,4 +112,28 @@ describe('Persistent Node Chat Server', () => {
         });
     });
   });
+
+  // it should have 1 message in table before we insert messages
+  it('Should have 1 message in table', (done) => {
+    dbConnection.query('Select * FROM Messages', (err, results) => {
+      if (err) {
+        throw err;
+      }
+      expect(results.length).toEqual(1);
+      done();
+    });
+  });
+
+  // it should have 1 user in table before we insert users
+  it('Should have 1 user in table', (done) => {
+    dbConnection.query('Select * FROM Users', (err, results) => {
+      if (err) {
+        throw err;
+      }
+      expect(results.length).toEqual(1);
+      done();
+
+    });
+  });
+
 });

@@ -22,7 +22,13 @@ module.exports = {
   // We already know this is for the messages endpoint
 
   post: function (req, res) {
-    res.send('Message posted');
+    models.messages.create(req.body, (err, data)=>{
+      if (err) {
+        throw new Error ('unable to post message');
+      } else {
+        res.send(data);
+      }
+    });
     //res.send(models.messages.create(req.body));
     // models.messages.create will create in the db
 

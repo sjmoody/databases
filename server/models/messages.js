@@ -21,17 +21,21 @@ module.exports = {
   }, // a function which produces all the messages
 
   // TODO: USE THE PATTERN ABOVE FOR MESSAGES AND USERS MODELS AND UPDATE USERS AND MESSAGE CONTROLLERS FOR SAME PATTERN THEN EXPECT TEST TO PASS!!!
-  create: function (obj) {
-    db.query(`SELECT id FROM Users WHERE username = ${obj.username} UNION SELECT id FROM Rooms WHERE roomname = ${obj.roomname}`, (err, results) => {
+  create: function (obj, cb) {
+
+    db.db.query(`SELECT id FROM Users WHERE name = '${obj.username}'`, (err, results) => {
       if (err) {
         throw err;
+      } else {
+        console.log('Query Results: ', results);
+        db.db.query(`INSERT INTO Messages VALUES (NULL, ${results[0].id}, '${obj.roomname}', '${obj.message}')`, (err, results1) => {
+          if (err) {
+            throw err;
+          }
+          cb(null, results1);
+        });
       }
-      db.query(`INSERT INTO Messages VALUES (NULL, ${results[0]}, ${results[1]}, ${obj.text})`, (err, results1) => {
-        if (err) {
-          throw err;
-        }
-        return results1;
-      });
+
     });
   } // a function which can be used to insert a message into the database
 };
