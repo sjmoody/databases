@@ -23,8 +23,6 @@ describe('Persistent Node Chat Server', () => {
     dbConnection.end();
   });
 
-
-
   it('Should insert posted messages to the DB', (done) => {
     const username = 'Valjean';
     const message = 'In mercys name, three days is all I need.';
@@ -114,7 +112,7 @@ describe('Persistent Node Chat Server', () => {
   });
 
   // it should have 1 message in table before we insert messages
-  it('Should have 1 message in table', (done) => {
+  it('Should have 1 message in table after the test above', (done) => {
     dbConnection.query('Select * FROM Messages', (err, results) => {
       if (err) {
         throw err;
@@ -125,7 +123,7 @@ describe('Persistent Node Chat Server', () => {
   });
 
   // it should have 1 user in table before we insert users
-  it('Should have 1 user in table', (done) => {
+  it('Should have 1 user in table after the test above', (done) => {
     dbConnection.query('Select * FROM Users', (err, results) => {
       if (err) {
         throw err;
@@ -136,4 +134,21 @@ describe('Persistent Node Chat Server', () => {
     });
   });
 
+  it('Should insert users with the same name', (done) => {
+    const username = 'Valjean';
+    // Create a user on the chat server database.
+    axios.post(`${API_URL}/users`, { username })
+      .then(()=>{
+        dbConnection.query('Select * FROM Users', (err, results) => {
+          if (err) {
+            throw err;
+          }
+          expect(results.length).toEqual(2);
+          done();
+        });
+      })
+      .catch((err) => {
+        throw err;
+      });
+  });
 });
